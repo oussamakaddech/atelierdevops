@@ -1,0 +1,1 @@
+echo "Ligne originale du fichier" > merge.txt
