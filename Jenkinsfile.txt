@@ -2,22 +2,50 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JAVA_HOME'
         maven 'M2_HOME'
+    }
+
+    environment {
+        SONARQUBE_TOKEN = 'votre_token_sonar' // Remplacez par votre token SonarQube ici
     }
 
     stages {
         stage('GIT') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/oussamakaddech/atelierdevops.git'
+                git branch: 'main', url: 'https://github.com/oussamakaddech/atelierdevops.git'
             }
         }
 
-        stage('Compile Stage') {
+        stage('Stage Compile') {
             steps {
                 sh 'mvn clean compile'
             }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                sh "mvn sonar:sonar -Dsonar.token=${SONARQUBE_TOKEN} -Dmaven.test.skip=true"
+            }
+        }
+
+        stage('Deploy to Nexus') {
+            steps {
+                script {
+                    sh 'mvn clean deploy -Dmaven.test.skip=true'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finished.'
+        }
+        success {
+            echo 'Pipeline succeeded.'
+        }
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }
