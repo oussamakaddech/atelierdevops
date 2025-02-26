@@ -1,12 +1,9 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'M2_HOME'
-    }
-
     environment {
-        SONARQUBE_TOKEN = 'squ_912f8bb937d3622d051f807758ae7fc0d78befdb' // Remplacez par votre token SonarQube ici
+        SONARQUBE_URL = 'http://your.sonarqube.server'
+        SONARQUBE_TOKEN = 'squ_912f8bb937d3622d051f807758ae7fc0d78befdb'
     }
 
     stages {
@@ -16,23 +13,33 @@ pipeline {
             }
         }
 
-        stage('Stage Compile') {
+        stage('Compile') {
             steps {
                 sh 'mvn clean compile'
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('SonarQube Analysis (via Docker)') {
             steps {
-                sh "mvn sonar:sonar -Dsonar.token=${SONARQUBE_TOKEN} -Dmaven.test.skip=true"
+                script {
+                    // Run SonarQube analysis using Docker container
+                    sh """
+                    docker run --rm \
+                    -v \$(pwd):/usr/src \
+                    -v /root/.m2:/root/.m2 \
+                    sonarsource/sonar-scanner-cli \
+                    -Dsonar.projectKey=your_project_key \
+                    -Dsonar.sources=src \
+                    -Dsonar.host.url=${SONARQUBE_URL} \
+                    -Dsonar.login=${SONARQUBE_TOKEN}
+                    """
+                }
             }
         }
 
-        stage('Deploy to Nexus') {
+        stage('Deploy') {
             steps {
-                script {
-                    sh 'mvn clean deploy -Dmaven.test.skip=true'
-                }
+                sh 'mvn clean deploy -Dmaven.test.skip=true'
             }
         }
     }
