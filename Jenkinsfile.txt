@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        SONARQUBE_TOKEN = 'votre_token_sonar' // Remplacez par votre token SonarQube ici
+        SONARQUBE_TOKEN = 'squ_912f8bb937d3622d051f807758ae7fc0d78befdb' // Remplacez par votre token SonarQube ici
     }
 
     stages {
