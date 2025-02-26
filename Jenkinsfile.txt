@@ -9,8 +9,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Checkout your code from the repository
-                checkout scm
+                // Explicitly checkout the repository from Git
+                git url: 'https://github.com/oussamakaddech/atelierdevops.git', branch: 'main' // Replace with your repository URL and branch
             }
         }
 
@@ -21,7 +21,6 @@ pipeline {
                     withMaven(
                         maven: 'M3',  // Ensure Maven tool is installed and configured in Jenkins
                         options: [
-                            // Optionally, you can specify additional properties for the SonarQube analysis
                             '-Dsonar.projectKey=my-app-key',
                             '-Dsonar.host.url=${SONARQUBE_URL}',
                             '-Dsonar.login=${SONARQUBE_TOKEN}'
