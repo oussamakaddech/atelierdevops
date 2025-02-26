@@ -9,15 +9,15 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Explicitly checkout the repository from Git
+                // Checkout the repository from Git
                 git url: 'https://github.com/oussamakaddech/atelierdevops.git', branch: 'main' // Replace with your repository URL and branch
             }
         }
 
-        stage('Build') {
+        stage('Build and SonarQube Analysis') {
             steps {
                 script {
-                    // Run Maven clean install and SonarQube analysis
+                    // Run Maven build and SonarQube analysis using withMaven
                     withMaven(
                         maven: 'M3',  // Ensure Maven tool is installed and configured in Jenkins
                         options: [
@@ -34,10 +34,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                script {
-                    // Trigger SonarQube scan if needed here, or it's handled by the Maven command
-                    echo 'SonarQube analysis triggered.'
-                }
+                echo 'SonarQube analysis triggered.'  // No additional steps needed, as SonarQube is handled in the build stage
             }
         }
     }
