@@ -2,57 +2,53 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE_URL = 'http://your.sonarqube.server'
+        SONARQUBE_URL = 'http://10.0.2.15:9000'
         SONARQUBE_TOKEN = 'squ_912f8bb937d3622d051f807758ae7fc0d78befdb'
     }
 
     stages {
-        stage('GIT') {
+        stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/oussamakaddech/atelierdevops.git'
+                // Checkout your code from the repository
+                checkout scm
             }
         }
 
-        stage('Compile') {
-            steps {
-                sh 'mvn clean compile'
-            }
-        }
-
-        stage('SonarQube Analysis (via Docker)') {
+        stage('Build') {
             steps {
                 script {
-                    // Run SonarQube analysis using Docker container
-                    sh """
-                    docker run --rm \
-                    -v \$(pwd):/usr/src \
-                    -v /root/.m2:/root/.m2 \
-                    sonarsource/sonar-scanner-cli \
-                    -Dsonar.projectKey=your_project_key \
-                    -Dsonar.sources=src \
-                    -Dsonar.host.url=${SONARQUBE_URL} \
-                    -Dsonar.login=${SONARQUBE_TOKEN}
-                    """
+                    // Run Maven clean install and SonarQube analysis
+                    withMaven(
+                        maven: 'M3',  // Ensure Maven tool is installed and configured in Jenkins
+                        options: [
+                            // Optionally, you can specify additional properties for the SonarQube analysis
+                            '-Dsonar.projectKey=my-app-key',
+                            '-Dsonar.host.url=${SONARQUBE_URL}',
+                            '-Dsonar.login=${SONARQUBE_TOKEN}'
+                        ]
+                    ) {
+                        sh 'mvn clean install sonar:sonar'
+                    }
                 }
             }
         }
 
-        stage('Deploy') {
+        stage('SonarQube Analysis') {
             steps {
-                sh 'mvn clean deploy -Dmaven.test.skip=true'
+                script {
+                    // Trigger SonarQube scan if needed here, or it's handled by the Maven command
+                    echo 'SonarQube analysis triggered.'
+                }
             }
         }
     }
 
     post {
-        always {
-            echo 'Pipeline finished.'
-        }
         success {
-            echo 'Pipeline succeeded.'
+            echo 'Build and SonarQube analysis completed successfully.'
         }
         failure {
-            echo 'Pipeline failed.'
+            echo 'Build or SonarQube analysis failed.'
         }
     }
 }
