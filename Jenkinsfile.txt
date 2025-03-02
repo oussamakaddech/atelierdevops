@@ -1,50 +1,22 @@
 pipeline {
     agent any
 
-    environment {
-        SONARQUBE_URL = 'http://10.0.2.15:9000'
-        SONARQUBE_TOKEN = 'squ_912f8bb937d3622d051f807758ae7fc0d78befdb'
+    tools { 
+        jdk 'JAVA_HOME' 
+        maven 'M2_HOME' 
     }
 
     stages {
-        stage('Checkout') {
+        stage('GIT') {
             steps {
-                // Checkout the repository from Git
-                git url: 'https://github.com/oussamakaddech/atelierdevops.git', branch: 'main' // Replace with your repository URL and branch
+                git branch: 'main', url: 'https://github.com/saifGt/projetTimeshet.git'
             }
         }
 
-        stage('Build and SonarQube Analysis') {
+        stage('Compile Stage') {
             steps {
-                script {
-                    // Run Maven build and SonarQube analysis using withMaven
-                    withMaven(
-                        maven: 'M3',  // Ensure Maven tool is installed and configured in Jenkins
-                        options: [
-                            '-Dsonar.projectKey=my-app-key',
-                            '-Dsonar.host.url=${SONARQUBE_URL}',
-                            '-Dsonar.login=${SONARQUBE_TOKEN}'
-                        ]
-                    ) {
-                        sh 'mvn clean install sonar:sonar'
-                    }
-                }
+                sh 'mvn clean compile'
             }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                echo 'SonarQube analysis triggered.'  // No additional steps needed, as SonarQube is handled in the build stage
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Build and SonarQube analysis completed successfully.'
-        }
-        failure {
-            echo 'Build or SonarQube analysis failed.'
         }
     }
 }
