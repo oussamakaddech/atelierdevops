@@ -82,13 +82,4 @@
         </plugins>
     </build>
 
-    <!-- Configuration des serveurs pour l'authentification -->
-    <servers>
-        <server>
-            <id>deploymentRepo</id>
-            <username>admin</username>
-            <password>nexus</password>
-        </server>
-    </servers>
-
 </project>
